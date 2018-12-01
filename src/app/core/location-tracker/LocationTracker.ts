@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import { Observable, Subject } from "rxjs";
 
 
 export interface IPoint {
@@ -13,3 +13,26 @@ export interface ILocationTracker {
     currentLocation: () => Promise<IPoint>
 }
 
+
+export const LocationTracker = () => {
+
+    let watchPosition = () => {
+        return new Observable((subject) => {
+            let pid: number
+
+            if('geolocation' in navigator) {
+                pid = navigator.geolocation.watchPosition(
+                    position => subject.next(position),
+                    error => subject.error(error)
+                )
+            } else {
+                subject.error('Geolocation not available')
+            }
+        })
+    }
+
+    return {
+        watchPosition
+    }
+
+}
