@@ -12,10 +12,8 @@ export interface IRunBuilderState {
 
 
 export interface IRunBuilder {
-
     state$: BehaviorSubject<IRunBuilderState>
     events$: Observable<{ key, data }>
-
     controller: {
         startRun: () => {}
         stopRun: () => {}
