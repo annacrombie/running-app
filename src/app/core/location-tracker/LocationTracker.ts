@@ -1,29 +1,24 @@
-import { Observable, Subject } from "rxjs";
+import { Observable } from "rxjs";
 
-
-export interface IPoint {
-    lat: number
-    lng: number
-}
 
 
 export interface ILocationTracker {
-    streamLocation: (pid: string) => Observable<IPoint>
+    streamLocation: (pid: string) => Observable<Position>
     stopStreaming: (pid: string) => void
-    currentLocation: () => Promise<IPoint>
+    currentLocation: () => Promise<Position>
 }
 
 
-export const LocationTracker = () => {
+export const LocationTracker = (): ILocationTracker => {
 
-    let watchPosition = () => {
-        return new Observable((subject) => {
+    let streamLocation = (pid: string) => {
+        return new Observable<Position>((subject) => {
             let pid: number
 
             if('geolocation' in navigator) {
                 pid = navigator.geolocation.watchPosition(
-                    position => subject.next(position),
-                    error => subject.error(error)
+                    position => subject.next(position as Position),
+                    error => subject.error(error as any)
                 )
             } else {
                 subject.error('Geolocation not available')
@@ -32,7 +27,15 @@ export const LocationTracker = () => {
     }
 
     return {
-        watchPosition
+        streamLocation,
+        stopStreaming: (pid) => {},
+        currentLocation: () => new Promise((res, rej) => {
+            if('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(res, rej)
+            } else {
+                rej('Geolocation not available')
+            }
+        })
     }
 
 }
